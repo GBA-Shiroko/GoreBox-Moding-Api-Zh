@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoreBox 模组开发手册 · 15.0.0 Beta4 汉化版</title>
+<style>
+  :root{
+    --bg:#1b1b1d; --panel:#262629; --panel2:#2f2f33; --line:#3a3a40;
+    --text:#ececee; --sub:#b9b9c0; --accent:#4ea1ff; --accent2:#7c5cff;
+    --code:#141416; --ok:#4ecb8b; --warn:#ffb454;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6}
+  header{position:sticky;top:0;z-index:20;background:#202023;padding:14px 16px;border-bottom:1px solid var(--line)}
+  header h1{font-size:17px;margin-bottom:8px}
+  header h1 small{display:block;font-size:12px;color:var(--sub);font-weight:400;margin-top:3px}
+  #search{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:15px}
+  #search::placeholder{color:#888}
+  .layout{display:flex;max-width:1100px;margin:0 auto}
+  nav{width:230px;flex:0 0 230px;padding:16px 10px;position:sticky;top:78px;align-self:flex-start;max-height:calc(100vh - 78px);overflow:auto}
+  nav a{display:block;color:var(--sub);text-decoration:none;font-size:13.5px;padding:6px 10px;border-radius:8px}
+  nav a:hover{background:var(--panel2);color:var(--text)}
+  main{flex:1;min-width:0;padding:16px}
+  section{margin-bottom:34px}
+  section>h2{font-size:19px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--accent2)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+  .card h3{font-size:15.5px;color:var(--accent);margin-bottom:6px}
+  .card .desc{color:var(--sub);font-size:14px;margin-bottom:8px}
+  .card .ret{color:var(--ok);font-size:13px;margin-bottom:6px}
+  .params{font-size:13.5px;color:var(--sub);margin:6px 0}
+  .params b{color:var(--text)}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:10px;overflow-x:auto;font-size:13px;margin:8px 0}
+  code{font-family:"SF Mono",Consolas,monospace;color:#e6e6ff}
+  pre code{color:#d7e6ff}
+  .note{background:#2a2416;border-left:3px solid var(--warn);padding:10px 12px;border-radius:8px;font-size:13.5px;color:#f0d9a8;margin:10px 0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left}
+  th{background:var(--panel2);color:var(--text)}
+  td{color:var(--sub)}
+  td code{color:#d7e6ff}
+  .tag{display:inline-block;font-size:11px;padding:1px 8px;border-radius:10px;background:var(--panel2);color:var(--sub);margin-left:6px}
+  .hidden{display:none}
+  footer{padding:20px 16px;color:#777;font-size:12px;text-align:center}
+  @media(max-width:760px){
+    nav{display:none}
+    main{padding:12px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>GoreBox 模组开发手册 <small>Version 15.0.0 Beta 4 · MiniScript 汉化版（函数名保留英文原文）</small></h1>
+  <input id="search" type="text" placeholder="搜索函数名 / 中文说明，例如 跟随、伤害、传送…">
+</header>
+<div class="layout">
+<nav id="nav">
+  <a href="#basic">基础命令</a>
+  <a href="#physics">物理命令</a>
+  <a href="#parent">父子关系与位移</a>
+  <a href="#events">事件监听</a>
+  <a href="#objects">对象管理</a>
+  <a href="#chat">聊天功能</a>
+  <a href="#currency">货币管理</a>
+  <a href="#player">玩家交互</a>
+  <a href="#inventory">背包管理</a>
+  <a href="#logic">逻辑工具函数</a>
+  <a href="#audio">音频管理</a>
+  <a href="#ai">AI 组件</a>
+  <a href="#vars">变换与游戏变量</a>
+  <a href="#save">存档读写</a>
+  <a href="#advanced">高级函数</a>
+</nav>
+<main>
+
+<!-- ========== 基础命令 ========== -->
+<section id="basic">
+  <h2>基础命令</h2>
+
+  <div class="card">
+    <h3>OpenConsole</h3>
+    <div class="desc">打开模组控制台，供玩家与模组进行交互。</div>
+    <pre><code>OpenConsole</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>CloseConsole</h3>
+    <div class="desc">关闭模组控制台，结束交互。</div>
+    <pre><code>CloseConsole</code></pre>
+  </div>
+</section>
+
+<!-- ========== 物理命令 ========== -->
+<section id="physics">
+  <h2>物理命令</h2>
+
+  <div class="card">
+    <h3>AddRigidbody</h3>
+    <div class="desc">为物体添加刚体（Rigidbody）组件，开启物理交互。若物体已有刚体，则把现有刚体注册给脚本使用。</div>
+    <div class="ret">返回值：新增刚体成功返回 <code>true</code>；已存在刚体返回 <code>false</code>。</div>
+    <pre><code>AddRigidbody</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>AddForce(x, y, z, mode)</h3>
+    <div class="desc">对已注册的物理物体施加力，力的类型由 <code>mode</code> 决定。</div>
+    <div class="params"><b>x / y / z：</b>力的三轴分量。<br><b>mode：</b>施加的力模式（见下表）。</div>
+    <pre><code>AddForce({"x": 0, "y": 0, "z": 0, "mode": 0})</code></pre>
+    <table>
+      <tr><th>mode</th><th>模式</th><th>说明</th></tr>
+      <tr><td>0</td><td>Force（持续力）</td><td>持续施加力，会受物体质量影响。</td></tr>
+      <tr><td>1</td><td>Acceleration（加速度）</td><td>持续施加加速度，忽略质量。</td></tr>
+      <tr><td>2</td><td>Impulse（冲量）</td><td>瞬时施加一次力的冲量，受质量影响。</td></tr>
+      <tr><td>3</td><td>VelocityChange（速度变化）</td><td>直接改变瞬时速度，忽略质量。</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>RemoveRigidbody</h3>
+    <div class="desc">移除物体的刚体组件，关闭物理交互。</div>
+    <div class="ret">返回值：移除成功返回 <code>true</code>；找不到刚体返回 <code>false</code>。</div>
+    <pre><code>RemoveRigidbody</code></pre>
+  </div>
+</section>
+
+<!-- ========== 父子与位移 ========== -->
+<section id="parent">
+  <h2>父子关系与位移、旋转、缩放</h2>
+
+  <div class="note">
+    <b>关于父子绑定：</b>把一个物体（子物体）链接到另一个物体（父物体）上，子物体会跟随父物体移动。这是搭建复杂物体和角色骨架的基础。通常只需要给父物体加刚体，由它带动子物体；除非特意挂有关节，否则不建议给子物体再加刚体，否则可能出现不可预料的物理行为。
+  </div>
+  <div class="note">
+    <b>关于本地坐标：</b>物体的本地位置、旋转始终相对于父物体。把本地位置和旋转全部置零，物体就会与父物体对齐。
+  </div>
+
+  <div class="card">
+    <h3>SetParent(parent)</h3>
+    <div class="desc">把当前物体的父物体设置为另一个已注册物体。</div>
+    <pre><code>SetParent({"name": "parentName"})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>位置</h3>
+    <table>
+      <tr><th>函数</th><th>说明</th></tr>
+      <tr><td><code>Move(x,y,z)</code></td><td>按世界坐标方向移动物体。</td></tr>
+      <tr><td><code>MoveLocal(x,y,z)</code></td><td>相对父物体的朝向移动。</td></tr>
+      <tr><td><code>SetPosition(x,y,z)</code></td><td>直接设置物体世界坐标。</td></tr>
+      <tr><td><code>SetLocalPosition(x,y,z)</code></td><td>设置相对于父物体的本地坐标。</td></tr>
+    </table>
+    <pre><code>Move({"x": 0, "y": 0, "z": 0})
+MoveLocal({"x": 0, "y": 0, "z": 0})
+SetPosition({"x": 0, "y": 0, "z": 0})
+SetLocalPosition({"x": 0, "y": 0, "z": 0})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>旋转</h3>
+    <table>
+      <tr><th>函数</th><th>说明</th></tr>
+      <tr><td><code>SetRotation(x,y,z)</code></td><td>设置物体世界旋转。</td></tr>
+      <tr><td><code>SetLocalRotation(x,y,z)</code></td><td>设置相对父物体的本地旋转。</td></tr>
+      <tr><td><code>Rotate(x,y,z)</code></td><td>按世界坐标系旋转。</td></tr>
+      <tr><td><code>RotateLocal(x,y,z)</code></td><td>相对父物体朝向旋转。</td></tr>
+    </table>
+    <pre><code>SetRotation({"x": 0, "y": 0, "z": 0})
+SetLocalRotation({"x": 0, "y": 0, "z": 0})
+Rotate({"x": 0, "y": 0, "z": 0})
+RotateLocal({"x": 0, "y": 0, "z": 0})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>缩放</h3>
+    <table>
+      <tr><th>函数</th><th>说明</th></tr>
+      <tr><td><code>SetScale(x,y,z)</code></td><td>设置物体缩放，会叠加父物体的缩放。</td></tr>
+      <tr><td><code>AddScale(x,y,z)</code></td><td>在现有缩放基础上增减，填负数可缩小。</td></tr>
+    </table>
+    <pre><code>SetScale({"x": 1, "y": 1, "z": 1})
+AddScale({"x": 1, "y": 1, "z": 1})</code></pre>
+  </div>
+</section>
+
+<!-- ========== 事件监听 ========== -->
+<section id="events">
+  <h2>事件监听</h2>
+
+  <div class="note">
+    <b>⚠️ 必备事件循环：</b>要让事件监听生效、回调被调用，下面这段循环<b>必须放在脚本最末尾</b>。不进入这个循环，所有事件都不会触发。
+  </div>
+  <pre><code>while true
+    while _events.len > 0
+        _nextEvent = _events.pull
+        _nextEvent.invoke(_nextEvent.args)
+    end while
+    yield
+end while</code></pre>
+
+  <div class="card">
+    <h3>ListenForPlayer / EndListenForPlayer</h3>
+    <div class="desc">开启 / 关闭本地玩家相关事件。开启后脚本会调用下列玩家回调函数。</div>
+    <table>
+      <tr><th>回调函数</th><th>触发时机</th></tr>
+      <tr><td><code>OnLocalTakeDamage(damage)</code></td><td>玩家受到伤害，附带伤害数值 <code>args.damage</code>。</td></tr>
+      <tr><td><code>OnLocalDied</code></td><td>玩家死亡。</td></tr>
+      <tr><td><code>OnLocalInfected</code></td><td>玩家被感染或被解除感染。</td></tr>
+      <tr><td><code>OnLocalHealed</code></td><td>玩家完全回血。</td></tr>
+      <tr><td><code>OnLocalKnockout</code></td><td>玩家被击晕倒地。</td></tr>
+      <tr><td><code>OnLocalWakeUp</code></td><td>玩家从击晕状态苏醒。</td></tr>
+      <tr><td><code>OnLocalSpawned</code></td><td>玩家重生 / 生成。</td></tr>
+      <tr><td><code>OnLocalRagdoll</code></td><td>玩家进入布娃娃（Ragdoll）状态。</td></tr>
+      <tr><td><code>OnLocalGetUp</code></td><td>玩家从布娃娃状态爬起。</td></tr>
+      <tr><td><code>OnLocalEmote(emoteName)</code></td><td>玩家播放表情动作，附带表情名字。</td></tr>
+      <tr><td><code>OnLocalEmoteEnd</code></td><td>表情动作结束。</td></tr>
+    </table>
+    <div class="desc" style="margin-top:8px">示例：</div>
+    <pre><code>OnLocalTakeDamage = function(args)
+    damageAmount = args.damage
+    print "哎哟！受到 " + damageAmount + " 点伤害！"
+    if damageAmount < 5 then
+        print "还好，不怎么疼。"
+    else
+        print "还是挺疼的。"
+    end if
+end function</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>ListenForServer / EndListenForServer</h3>
+    <div class="desc">开启 / 关闭服务器相关事件。</div>
+    <table>
+      <tr><th>回调函数</th><th>触发时机</th></tr>
+      <tr><td><code>OnPlayerJoined(player)</code></td><td>有玩家加入服务器，附带玩家名。</td></tr>
+      <tr><td><code>OnPlayerLeft(player)</code></td><td>有玩家离开服务器，附带玩家名。</td></tr>
+      <tr><td><code>OnKilledPlayer(player)</code></td><td>本地玩家击杀了其他玩家，附带受害者名字。</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>ListenForChat / EndListenForChat</h3>
+    <div class="desc">开启 / 关闭聊天事件。</div>
+    <table>
+      <tr><th>回调函数</th><th>触发时机</th></tr>
+      <tr><td><code>OnChatMessage(sender, message)</code></td><td>收到聊天消息，附带发送者用户名和消息内容。</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>ListenForInventory / EndListenForInventory</h3>
+    <div class="desc">开启 / 关闭背包操作事件。</div>
+    <table>
+      <tr><th>回调函数</th><th>触发时机</th></tr>
+      <tr><td><code>OnItemSelect(slot)</code></td><td>玩家切换 / 装备物品，附带背包槽位编号。</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>ListenForInstantiation / EndListenForInstantiation</h3>
+    <div class="desc">开启 / 关闭物体生成事件。</div>
+    <table>
+      <tr><th>回调函数</th><th>触发时机</th></tr>
+      <tr><td><code>OnInstantiate(player, name)</code></td><td>物体被生成，附带生成者名字和物体名字。</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>ListenForSceneChange / EndListenForSceneChange</h3>
+    <div class="desc">开启 / 关闭场景切换事件。</div>
+    <table>
+      <tr><th>回调函数</th><th>触发时机</th></tr>
+      <tr><td><code>OnSceneChanged(sceneName)</code></td><td>加载新地图 / 场景，附带场景名字。</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>ListenForInput / EndListenForInput</h3>
+    <div class="desc">开启 / 关闭按键输入事件。</div>
+    <table>
+      <tr><th>回调函数</th><th>触发时机</th></tr>
+      <tr><td><code>OnKeyPress(key)</code></td><td>按键按下，附带键名。</td></tr>
+      <tr><td><code>OnKeyHold(key)</code></td><td>按键持续按住，附带键名。</td></tr>
+      <tr><td><code>OnKeyLift(key)</code></td><td>按键松开，附带键名。</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ========== 对象管理 ========== -->
+<section id="objects">
+  <h2>对象管理</h2>
+
+  <div class="card">
+    <h3>SetTexture(name)</h3>
+    <div class="desc">获取物体的渲染器，把材质贴图设置为已加载的指定贴图（按名字引用）。</div>
+    <pre><code>SetTexture({"name": "myTexture"})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>InstantiateEmpty(name, x, y, z, rotX, rotY, rotZ, rotW)</h3>
+    <div class="desc">在指定位置和旋转下创建一个空物体。该物体会自动注册，可用于 <code>Destroy</code>、<code>ExecuteScript</code> 等命令。</div>
+    <pre><code>InstantiateEmpty({"name": "emptyObject", "x": 0, "y": 0, "z": 0, "rotX": 0, "rotY": 0, "rotZ": 0, "rotW": 0})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>InstantiateEmptyChild(name, x, y, z, rotX, rotY, rotZ, rotW)</h3>
+    <div class="desc">在当前物体下创建一个空子物体，位置旋转相对当前物体。自动注册。</div>
+    <pre><code>InstantiateEmptyChild({"name": "emptyChildObject", "x": 0, "y": 0, "z": 0, "rotX": 0, "rotY": 0, "rotZ": 0, "rotW": 0})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>InstantiateModelChild(model, name, x, y, z, rot…, scale, collisions, convex)</h3>
+    <div class="desc">把已加载的模型生成为当前物体的子物体，可设置名字、位置、旋转、缩放（相对当前物体），并可选是否开启碰撞（可设为凸碰撞）。模型自动注册。</div>
+    <pre><code>InstantiateModelChild({"model": "myModel.fbx", "name": "myModel", "x": 0, "y": 0, "z": 0, "rotX": 0, "rotY": 0, "rotZ": 0, "rotW": 0, "scale": 1, "collisions": true, "convex": true})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>InstantiateModel(model, name, x, y, z, rot…, scale, collisions, convex)</h3>
+    <div class="desc">把已加载的模型生成到场景中（非子物体），可设置名字、位置、旋转、缩放，并可选是否开启碰撞（可设为凸碰撞）。模型自动注册。</div>
+    <pre><code>InstantiateModel({"model": "myModel.fbx", "name": "myModel", "x": 0, "y": 0, "z": 0, "rotX": 0, "rotY": 0, "rotZ": 0, "rotW": 0, "scale": 1, "collisions": true, "convex": true})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>Instantiate(name, path, x, y, z, rotX, rotY, rotZ, rotW)</h3>
+    <div class="desc">从游戏内置资源路径生成一个指定名字的物体，位置和旋转可设置。自动注册。</div>
+    <pre><code>Instantiate({"name": "spawnedDoll", "path": "AI/GoreDoll", "x": 0, "y": 0, "z": 0, "rotX": 0, "rotY": 0, "rotZ": 0, "rotW": 0})</code></pre>
+    <div class="note">建议使用唯一的物体名字，避免识别困难和意外重复；在联机场景中，某些情况下只应由房主（Host）生成物体。</div>
+  </div>
+
+  <div class="card">
+    <h3>ExecuteScript(target, script)</h3>
+    <div class="desc">在已注册的目标物体上执行一段已有的用户脚本。</div>
+    <pre><code>ExecuteScript({"target": "spawnedDoll", "script": "aiScript"})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>ExecuteScriptOnChildren(target, script)</h3>
+    <div class="desc">在目标物体的所有子物体上执行一段已有的用户脚本。</div>
+    <pre><code>ExecuteScriptOnChildren({"target": "spawnedDoll", "script": "aiScript"})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>Destroy(name)</h3>
+    <div class="desc">销毁一个已注册的物体。</div>
+    <pre><code>Destroy({"name": "spawnedDoll"})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>DestroySelf</h3>
+    <div class="desc">销毁当前物体自身。</div>
+    <pre><code>DestroySelf</code></pre>
+  </div>
+</section>
+
+<!-- ========== 聊天功能 ========== -->
+<section id="chat">
+  <h2>聊天功能</h2>
+
+  <div class="note">
+    <b>自定义指令：</b>借助聊天 API，你可以添加自定义命令增强互动。玩家发送的消息中，<b>只有以 <code>?</code> 开头</b>的消息会被识别为自定义命令，不会发到公聊；若 <code>ListenForChat</code> 处于开启状态，会被 <code>OnChatMessage</code> 捕获。
+  </div>
+  <pre><code>OnChatMessage = function(args)
+    if message == "die" then
+        PlayerKill
+    end if
+end function</code></pre>
+
+  <div class="card">
+    <h3>SendChatMessage(sender, message)</h3>
+    <div class="desc">向<b>所有玩家</b>发送一条聊天消息，可自定义发送者名字和内容，支持富文本格式。</div>
+    <pre><code>SendChatMessage({"sender": "Bank", "message": username + " 目前拥有 " + cash + "GB$"})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>SendChatMessageLocal(sender, message)</h3>
+    <div class="desc"><b>仅向执行脚本的本地玩家</b>显示消息，其他玩家看不见。支持富文本格式。</div>
+    <pre><code>SendChatMessageLocal({"sender": "Bank", "message": "你当前拥有 " + cash + " GB$"})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>SendErrorMessage(message)</h3>
+    <div class="desc">发送一条本地错误提示，仅执行脚本的玩家可见。</div>
+    <pre><code>SendErrorMessage({"message": "这是一条错误提示"})</code></pre>
+  </div>
+</section>
+
+<!-- ========== 货币管理 ========== -->
+<section id="currency">
+  <h2>货币管理（GB$ 游戏币）</h2>
+
+  <div class="card">
+    <h3>GiveCurrency(amount)</h3>
+    <div class="desc">奖励玩家指定数量的 GB$。</div>
+    <pre><code>GiveCurrency({"amount": 500})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>RemoveCurrency(amount)</h3>
+    <div class="desc">从玩家余额中扣除指定数量的 GB$。</div>
+    <pre><code>RemoveCurrency({"amount": 500})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>DropCurrency(amount)</h3>
+    <div class="desc">让玩家在游戏中掉落指定数量的 GB$。</div>
+    <pre><code>DropCurrency({"amount": 500})</code></pre>
+  </div>
+</section>
+
+<!-- ========== 玩家交互 ========== -->
+<section id="player">
+  <h2>玩家交互</h2>
+
+  <div class="card">
+    <h3>SetCanDropWeapons(state)</h3>
+    <div class="desc">设置玩家是否允许丢弃武器。</div>
+    <pre><code>SetCanDropWeapons({"state": false})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>PlayerHeal</h3>
+    <div class="desc">完全恢复玩家生命值。</div>
+    <pre><code>PlayerHeal</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>PlayerKill</h3>
+    <div class="desc">立即杀死玩家。</div>
+    <pre><code>PlayerKill</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>PlayerEmote(emote)</h3>
+    <div class="desc">为玩家触发指定的表情动作。</div>
+    <pre><code>PlayerEmote({"emote": "twerk"})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>PlayerEndEmote</h3>
+    <div class="desc">停止玩家正在播放的任何表情动作。</div>
+    <pre><code>PlayerEndEmote</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>PlayerCripple</h3>
+    <div class="desc">强制玩家保持蹲伏姿势，直到死亡。</div>
+    <pre><code>PlayerCripple</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>PlayerProtect(duration)</h3>
+    <div class="desc">为玩家开启出生保护（无敌），持续指定时长，默认 4 秒。</div>
+    <pre><code>PlayerProtect({"duration": 4})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>PlayerSetTeam(team)</h3>
+    <div class="desc">把玩家分配到指定阵营，会影响 AI 对玩家的交互。设为 <code>Maniac</code> 后，中立 NPC 会变得具有攻击性，敌对 NPC 则会与玩家结盟。</div>
+    <pre><code>PlayerSetTeam({"team": "Maniac"})</code></pre>
+    <table>
+      <tr><th>可选阵营</th><th>含义</th></tr>
+      <tr><td><code>Civilian</code></td><td>平民</td></tr>
+      <tr><td><code>Maniac</code></td><td>狂徒</td></tr>
+      <tr><td><code>Mutant</code></td><td>变异体</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>PlayerRagdoll</h3>
+    <div class="desc">触发玩家的布娃娃物理状态。</div>
+    <pre><code>PlayerRagdoll</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>PlayerGetUp</h3>
+    <div class="desc">在可行时让玩家退出布娃娃模式并站起。</div>
+    <pre><code>PlayerGetUp</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>PlayerTeleport(x, y, z)</h3>
+    <div class="desc">把玩家传送到指定坐标。</div>
+    <pre><code>PlayerTeleport({"x": 0, "y": 0, "z": 0})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>PlayerInfect(state)</h3>
+    <div class="desc">根据传入状态感染或解除玩家的感染状态。</div>
+    <pre><code>PlayerInfect({"state": true})</code></pre>
+  </div>
+</section>
+
+<!-- ========== 背包管理 ========== -->
+<section id="inventory">
+  <h2>背包管理</h2>
+
+  <div class="card">
+    <h3>ClearInventory</h3>
+    <div class="desc">移除玩家背包中的全部物品。</div>
+    <pre><code>ClearInventory</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>GiveItem(name)</h3>
+    <div class="desc">给予玩家指定物品。</div>
+    <pre><code>GiveItem({"name": "P90"})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>RemoveItem(name)</h3>
+    <div class="desc">从玩家背包中移除指定物品。</div>
+    <pre><code>RemoveItem({"name": "P90"})</code></pre>
+  </div>
+</section>
+
+<!-- ========== 逻辑工具 ========== -->
+<section id="logic">
+  <h2>逻辑工具函数</h2>
+
+  <div class="card">
+    <h3>StringContains(string, target)</h3>
+    <div class="desc">判断给定字符串是否包含指定子串，适合做关键词检测。包含时返回 <code>true</code>。</div>
+    <pre><code>if StringContains({"string": "hello, may I have some money?", "target": "money"}) then
+    SendChatMessage({"sender": "Bank", "message": "没问题！"})
+    GiveCurrency({"amount": 500})
+end if</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>RandomInt(min, max)</h3>
+    <div class="desc">在 min 与 max 之间生成随机整数，<b>上限不包含在内</b>。</div>
+    <pre><code>x = RandomInt({"min": 0, "max": 10})
+print x
+if x == 9 then
+    print "幸运数字！"
+end if</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>RandomFloat(min, max)</h3>
+    <div class="desc">在 min 与 max 之间生成随机浮点数，<b>上限不包含在内</b>。</div>
+    <pre><code>x = RandomFloat({"min": 0, "max": 10})
+print x
+if x >= 9.9 then
+    print "这只有 1% 的概率发生！"
+end if</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>HasRegistered(name)</h3>
+    <div class="desc">检查是否存在指定名字的已注册物体。</div>
+    <pre><code>HasRegistered({"name": "myObject"})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>HasComponent(componentName)</h3>
+    <div class="desc">检查当前物体是否拥有指定组件，有则返回 <code>true</code>。</div>
+    <pre><code>HasComponent({"name": "AudioSource"})</code></pre>
+  </div>
+</section>
+
+<!-- ========== 音频 ========== -->
+<section id="audio">
+  <h2>音频管理</h2>
+
+  <div class="card">
+    <h3>AddAudioSource</h3>
+    <div class="desc">为物体附加音频源（AudioSource）组件。</div>
+    <pre><code>AddAudioSource</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>SetAudioLoop(state)</h3>
+    <div class="desc">设置音频是否循环播放。</div>
+    <pre><code>SetAudioLoop({"state": true})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>SetAudioVolume(value)</h3>
+    <div class="desc">调节音频源音量，取值 0 ~ 1。</div>
+    <pre><code>SetAudioVolume({"value": 0.5})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>SetAudioPitch(value)</h3>
+    <div class="desc">设置音频音调。</div>
+    <pre><code>SetAudioPitch({"value": 1})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>SetAudioSpatial(value)</h3>
+    <div class="desc">设置音频空间混合：0 为 2D 音频，1 为完全 3D 空间音频。</div>
+    <pre><code>SetAudioSpatial({"value": 1})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>SetAudioMinDistance(value)</h3>
+    <div class="desc">设置音频最小可听见距离。</div>
+    <pre><code>SetAudioMinDistance({"value": 0})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>SetAudioMaxDistance(value)</h3>
+    <div class="desc">设置音频最大可听见距离。</div>
+    <pre><code>SetAudioMaxDistance({"value": 30})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>SetAudioClip(name)</h3>
+    <div class="desc">为音频源指定一段已加载的音频片段。</div>
+    <pre><code>SetAudioClip({"name": "theme.mp3"})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>PlayAudioSource</h3>
+    <div class="desc">开始播放音频源。</div>
+    <pre><code>PlayAudioSource</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>StopAudioSource</h3>
+    <div class="desc">停止音频播放。</div>
+    <pre><code>StopAudioSource</code></pre>
+  </div>
+</section>
+
+<!-- ========== AI ========== -->
+<section id="ai">
+  <h2>AI 组件</h2>
+
+  <div class="card">
+    <h3>AddAI</h3>
+    <div class="desc">为物体添加 AI 组件。</div>
+    <pre><code>AddAI</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>AISetSpeed(value)</h3>
+    <div class="desc">设置 AI 的移动速度。</div>
+    <pre><code>AISetSpeed({"value": 5})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>AIFollowTarget(target)</h3>
+    <div class="desc">让 AI 跟随指定的已注册物体（例如玩家）。</div>
+    <pre><code>AIFollowTarget({"target": "player"})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>RemoveAI</h3>
+    <div class="desc">移除物体上的 AI 组件。</div>
+    <pre><code>RemoveAI</code></pre>
+  </div>
+</section>
+
+<!-- ========== 变量 ========== -->
+<section id="vars">
+  <h2>变换数据与游戏变量</h2>
+  <div class="desc" style="color:var(--sub)">除标注为只读的变量外，下列变换值和数据都可以直接读写，无需调用函数。示例：<code>cash = 300</code>、<code>posX = 3</code>。</div>
+
+  <div class="card">
+    <h3>位置</h3>
+    <table>
+      <tr><th>变量</th><th>说明</th></tr>
+      <tr><td><code>posX / posY / posZ</code></td><td>本物体的世界 X / Y / Z 坐标。</td></tr>
+      <tr><td><code>localPosX / localPosY / localPosZ</code></td><td>本地坐标（相对父物体），受父物体位置影响。</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>旋转</h3>
+    <table>
+      <tr><th>变量</th><th>说明</th></tr>
+      <tr><td><code>rotX / rotY / rotZ</code></td><td>本物体的世界旋转。</td></tr>
+      <tr><td><code>localRotX / localRotY / localRotZ</code></td><td>本地旋转（相对父物体），受父物体旋转影响。</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>缩放与子物体</h3>
+    <table>
+      <tr><th>变量</th><th>说明</th></tr>
+      <tr><td><code>scaleX / scaleY / scaleZ</code></td><td>本物体缩放（相对父物体）。</td></tr>
+      <tr><td><code>childCount</code></td><td>子物体数量。<span class="tag">只读</span></td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>游戏数据</h3>
+    <table>
+      <tr><th>变量</th><th>说明</th></tr>
+      <tr><td><code>cash</code></td><td>游戏货币（GB$）。</td></tr>
+      <tr><td><code>streak</code></td><td>当前连杀数。</td></tr>
+      <tr><td><code>infected</code></td><td>玩家是否被感染（true / false）。</td></tr>
+      <tr><td><code>isHost</code></td><td>玩家是否为主机房主（true / false）。</td></tr>
+      <tr><td><code>dead</code></td><td>玩家是否已死亡。</td></tr>
+      <tr><td><code>equippedWeapon</code></td><td>当前手持武器（只读，修改无效）。</td></tr>
+      <tr><td><code>name</code></td><td>本物体名字。</td></tr>
+      <tr><td><code>username</code></td><td>玩家用户名。</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>系统数据 <span class="tag">只读</span></h3>
+    <table>
+      <tr><th>变量</th><th>说明</th></tr>
+      <tr><td><code>version</code></td><td>当前游戏版本号。</td></tr>
+      <tr><td><code>path</code></td><td>GoreBox 应用数据文件夹路径。</td></tr>
+      <tr><td><code>platform</code></td><td>模组运行所在平台。</td></tr>
+      <tr><td><code>targetFrameRate</code></td><td>游戏目标帧率。</td></tr>
+      <tr><td><code>gamemode</code></td><td>当前游戏模式。</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ========== 存档 ========== -->
+<section id="save">
+  <h2>存档读写</h2>
+  <div class="desc" style="color:var(--sub)">通过一个「键名（key）」来标识和取回数值。例如用键名 <code>"score"</code> 保存分数，之后再用同一个键名读取。</div>
+
+  <div class="card">
+    <h3>SaveFloat(key, value)</h3>
+    <div class="desc">安全保存一个浮点数。</div>
+    <pre><code>SaveFloat({"key": "hunger", "value": 34.2})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>SaveInt(key, value)</h3>
+    <div class="desc">安全保存一个整数。</div>
+    <pre><code>SaveInt({"key": "score", "value": 100})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>SaveString(key, value)</h3>
+    <div class="desc">安全保存一个字符串。</div>
+    <pre><code>SaveString({"key": "rank", "value": "chief"})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>GetFloat(key, defaultValue)</h3>
+    <div class="desc">读取已保存的浮点数；读不到时返回默认值。</div>
+    <pre><code>GetFloat({"key": "hunger", "defaultValue": 100})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>GetInt(key, defaultValue)</h3>
+    <div class="desc">读取已保存的整数；读不到时返回默认值。</div>
+    <pre><code>GetInt({"key": "score", "defaultValue": 0})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>GetString(key, defaultValue)</h3>
+    <div class="desc">读取已保存的字符串；读不到时返回默认值。</div>
+    <pre><code>GetString({"key": "rank", "defaultValue": "jobless"})</code></pre>
+  </div>
+</section>
+
+<!-- ========== 高级函数 ========== -->
+<section id="advanced">
+  <h2>高级函数</h2>
+
+  <div class="card">
+    <h3>AddGamemode(…)</h3>
+    <div class="desc">用一长串配置参数添加一个新的游戏模式及其权限设置。</div>
+    <pre><code>AddGamemode({
+    "modeName": "GunGame", "isHidden": false, "minPlayers": 2, "maxPlayers": 8,
+    "singleplayer": false, "multiplayer": true,
+    "hostSwitchFeed": false, "playerConnectionFeed": true, "killFeed": true,
+    "hostBadge": false, "hostCommands": false, "hostPerms": false,
+    "canDropWeapons": false, "creator": false, "noclip": false,
+    "invincibility": false, "slowMo": false, "infstamina": false, "infammo": true,
+    "ignoredAI": false, "actionCam": false,
+    "banDolls": true, "banAiDolls": true, "banExplosives": true,
+    "banBigExplosives": true, "banRC": true, "banVehicles": true,
+    "banNextbots": true, "banEntities": true, "banClothes": true,
+    "banMeds": true, "banProps": true, "banFood": true,
+    "banExplosiveWeapons": true, "banHeavyWeapons": true,
+    "banLightWeapons": true, "banMeleeWeapons": true
+})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>RegisterGameObject(name, registeredName)</h3>
+    <div class="desc">找到目标名字的场景物体，把它改名为 <code>registeredName</code> 并注册，以便脚本控制。</div>
+    <pre><code>RegisterGameObject({"name": "GoreDoll0291", "registeredName": "registeredGoreDoll"})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>AddComponent(componentName)</h3>
+    <div class="desc">在当前物体上添加请求的组件（若存在）。</div>
+    <pre><code>AddComponent({"componentName": "BoxCollider"})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>RemoveComponent(componentName)</h3>
+    <div class="desc">移除当前物体上请求的组件（若存在）。</div>
+    <pre><code>RemoveComponent({"componentName": "BoxCollider"})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>SetComponentValue(componentName, propertyName, value)</h3>
+    <div class="desc">设置当前物体某组件内指定属性的值。例：把刚体质量设为 50。</div>
+    <pre><code>SetComponentValue({"componentName": "RigidBody", "propertyName": "mass", "value": 50})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>GetComponentStringValue(componentName, propertyName)</h3>
+    <div class="desc">读取组件中指定属性的字符串值。</div>
+    <pre><code>GetComponentStringValue({"componentName": "TMP_Text", "propertyName": "text"})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>GetComponentIntValue(componentName, propertyName)</h3>
+    <div class="desc">读取组件中指定属性的整数值，例：武器弹匣容量。</div>
+    <pre><code>GetComponentIntValue({"componentName": "GBWeapon", "propertyName": "MagSize"})</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>GetComponentFloatValue(componentName, propertyName)</h3>
+    <div class="desc">读取组件中指定属性的浮点数值，例：玩家主控的时间百分比。</div>
+    <pre><code>GetComponentFloatValue({"componentName": "PlayerMaster", "propertyName": "timePercent"})</code></pre>
+  </div>
+</section>
+
+</main>
+</div>
+<footer>基于 GoreBox Modding Documentation Version 15.0.0 Beta 4 翻译整理 · 函数名与参数保留英文原文，便于对照源码使用</footer>
+
+<script>
+  const search = document.getElementById('search');
+  const cards = Array.from(document.querySelectorAll('.card'));
+  const sections = Array.from(document.querySelectorAll('section'));
+  search.addEventListener('input', function(){
+    const q = this.value.trim().toLowerCase();
+    cards.forEach(card=>{
+      const text = card.textContent.toLowerCase();
+      card.classList.toggle('hidden', q && !text.includes(q));
+    });
+    sections.forEach(sec=>{
+      const visible = sec.querySelectorAll('.card:not(.hidden)').length > 0;
+      sec.classList.toggle('hidden', !visible);
+    });
+  });
+</script>
+</body>
+</html>
